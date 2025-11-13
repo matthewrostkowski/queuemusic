@@ -2,7 +2,8 @@ require "rails_helper"
 
 RSpec.describe "VenuesController", type: :request do
   let!(:user)  { User.create!(display_name: "SpecUser", auth_provider: "guest") }
-  let!(:venue) { Venue.create!(name: "Queue House", location: "Somewhere", capacity: 100) }
+  let!(:host) { User.create!(display_name: "Host", auth_provider: "guest") }
+  let!(:venue) { Venue.create!(name: "Queue House", location: "Somewhere", capacity: 100, host_user_id: host.id) }
 
   before { login_as(user) }
 

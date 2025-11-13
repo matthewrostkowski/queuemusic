@@ -13,6 +13,11 @@ RSpec.describe User, type: :model do
       expect(association.options[:through]).to eq(:queue_items)
       expect(association.options[:source]).to eq(:song)
     end
+
+    it 'has many hosted_venues' do
+      association = User.reflect_on_association(:hosted_venues)
+      expect(association.macro).to eq(:has_many)
+    end
   end
 
   describe 'validations' do
@@ -54,10 +59,56 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe '#authenticate' do
+    let(:user) do
+      User.create!(
+        auth_provider: "general_user",
+        display_name: "Test User",
+        email: "test@example.com",
+        password: "correct_password",
+        password_confirmation: "correct_password"
+      )
+    end
+
+    it "returns user when password is correct" do
+      expect(user.authenticate("correct_password")).to eq(user)
+    end
+
+    it "returns false when password is incorrect" do
+      expect(user.authenticate("wrong_password")).to be_falsey
+    end
+
+    it "is case sensitive for passwords" do
+      expect(user.authenticate("Correct_password")).to be_falsey
+    end
+  end
+
   describe '#total_upvotes_received' do
     let(:user) { User.create!(display_name: 'TestUser', auth_provider: 'guest') }
-    let(:venue) { Venue.create!(name: 'Test Venue', location: '123 Test St', capacity: 200) }
-    let(:session) { venue.queue_sessions.create!(is_active: true) }
+    let(:host) do
+      User.create!(
+        display_name: 'Host',
+        auth_provider: 'general_user',
+        email: 'host@test.com',
+        password: 'password123',
+        password_confirmation: 'password123'
+      )
+    end
+    let(:venue) do
+      Venue.create!(
+        name: 'Test Venue',
+        location: '123 Test St',
+        capacity: 200,
+        host_user_id: host.id
+      )
+    end
+    let(:session) do
+      venue.queue_sessions.create!(
+        status: 'active',
+        started_at: Time.current,
+        join_code: '123456'
+      )
+    end
 
     context 'when user has no queue items' do
       it 'returns 0' do
@@ -124,8 +175,15 @@ RSpec.describe User, type: :model do
 
     context 'with queue items' do
       before do
-        venue = Venue.create!(name: 'Test', location: '123 St', capacity: 200)
-        session = venue.queue_sessions.create!(is_active: true)
+        host = User.create!(
+          display_name: 'Host',
+          auth_provider: 'general_user',
+          email: 'host@test.com',
+          password: 'password123',
+          password_confirmation: 'password123'
+        )
+        venue = Venue.create!(name: 'Test', location: '123 St', capacity: 200, host_user_id: host.id)
+        session = venue.queue_sessions.create!(status: 'active', started_at: Time.current, join_code: '123456')
         song = Song.create!(title: 'Test', artist: 'Artist')
         
         QueueItem.create!(
@@ -143,6 +201,92 @@ RSpec.describe User, type: :model do
         expect(summary[:queued_count]).to eq(1)
         expect(summary[:upvotes_total]).to eq(7)
       end
+    end
+  end
+
+  describe '#is_host?' do
+    it "returns true if user has hosted venues" do
+      host = User.create!(
+        display_name: 'Host',
+        auth_provider: 'general_user',
+        email: 'host@test.com',
+        password: 'password123',
+        password_confirmation: 'password123'
+      )
+      host.hosted_venues.create!(name: 'Venue 1', location: 'NYC', capacity: 100)
+      
+      expect(host.is_host?).to be_truthy
+    end
+
+    it "returns false if user has no hosted venues" do
+      user = User.create!(display_name: 'User', auth_provider: 'guest')
+      
+      expect(user.is_host?).to be_falsey
+    end
+  end
+
+  describe 'email uniqueness' do
+    it "prevents duplicate emails" do
+      User.create!(
+        auth_provider: "general_user",
+        display_name: "User 1",
+        email: "test@example.com",
+        password: "password123",
+        password_confirmation: "password123"
+      )
+
+      duplicate = User.new(
+        auth_provider: "general_user",
+        display_name: "User 2",
+        email: "test@example.com",
+        password: "password123",
+        password_confirmation: "password123"
+      )
+
+      expect(duplicate).not_to be_valid
+    end
+
+    it "is case-insensitive for email uniqueness" do
+      User.create!(
+        auth_provider: "general_user",
+        display_name: "User 1",
+        email: "Test@Example.Com",
+        password: "password123",
+        password_confirmation: "password123"
+      )
+
+      duplicate = User.new(
+        auth_provider: "general_user",
+        display_name: "User 2",
+        email: "test@example.com",
+        password: "password123",
+        password_confirmation: "password123"
+      )
+
+      expect(duplicate).not_to be_valid
+    end
+  end
+
+  describe 'scopes' do
+    before do
+      User.create!(display_name: 'Guest1', auth_provider: 'guest')
+      User.create!(
+        display_name: 'Host1',
+        auth_provider: 'general_user',
+        email: 'host@test.com',
+        password: 'password123',
+        password_confirmation: 'password123'
+      )
+    end
+
+    it 'finds user by email' do
+      user = User.find_by(email: 'host@test.com')
+      expect(user.display_name).to eq('Host1')
+    end
+
+    it 'finds user by display_name' do
+      user = User.find_by(display_name: 'Guest1')
+      expect(user.auth_provider).to eq('guest')
     end
   end
 end

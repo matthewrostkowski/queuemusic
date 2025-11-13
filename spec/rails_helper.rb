@@ -1,3 +1,4 @@
+# spec/rails_helper.rb
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
@@ -35,17 +36,22 @@ begin
 rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
+
 RSpec.configure do |config|
-  # Include FactoryBot syntax methods
+  # Include FactoryBot syntax methods (from dev)
   config.include FactoryBot::Syntax::Methods
-  # Include ActiveSupport testing helpers
+
+  # Include ActiveSupport testing helpers (from dev)
   config.include ActiveSupport::Testing::TimeHelpers
 
+  # Helper used in request specs like queue_items_controller_spec, songs_controller_spec, etc. (from feature branch)
   def login_as(user)
+    Rails.logger.info "[TEST AUTH] login_as called for user id=#{user&.id.inspect} email=#{user&.email.inspect} display_name=#{user&.display_name.inspect}"
     allow_any_instance_of(ApplicationController)
       .to receive(:current_user)
       .and_return(user)
   end
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')
@@ -58,23 +64,6 @@ RSpec.configure do |config|
 
   # You can uncomment this line to turn off ActiveRecord support entirely.
   # config.use_active_record = false
-
-  # RSpec Rails uses metadata to mix in different behaviours to your tests,
-  # for example enabling you to call `get` and `post` in request specs. e.g.:
-  #
-  #     RSpec.describe UsersController, type: :request do
-  #       # ...
-  #     end
-  #
-  # The different available types are documented in the features, such as in
-  # https://rspec.info/features/8-0/rspec-rails
-  #
-  # You can also this infer these behaviours automatically by location, e.g.
-  # /spec/models would pull in the same behaviour as `type: :model` but this
-  # behaviour is considered legacy and will be removed in a future version.
-  #
-  # To enable this behaviour uncomment the line below.
-  # config.infer_spec_type_from_file_location!
 
   # Filter lines from Rails gems in backtraces.
   config.filter_rails_from_backtrace!

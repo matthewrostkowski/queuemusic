@@ -1,0 +1,28 @@
+require 'rails_helper'
+
+RSpec.describe QueueItem, type: :model do
+  let(:session) { QueueSession.create!(venue: User.create!(display_name: "Host", auth_provider: "guest").tap { |h| Venue.create!(name: "Test Venue", host_user_id: h.id) }.venues.first, is_active: true) }
+
+  it 'exists as a model' do
+    expect(QueueItem).to be_a(Class)
+  end
+
+  it 'has a queue_session association' do
+    expect(QueueItem.reflect_on_association(:queue_session)).to be_present
+  end
+
+  it 'has a song association' do
+    expect(QueueItem.reflect_on_association(:song)).to be_present
+  end
+
+  it "is valid with title and artist" do
+    qi = QueueItem.new(queue_session: session, title: "Song", artist: "Artist")
+    expect(qi).to be_valid
+  end
+
+  it "orders by vote_score desc then created_at asc" do
+    b = QueueItem.create!(queue_session: session, title: "B", artist: "A", vote_score: 3, created_at: 2.minutes.ago)
+    a = QueueItem.create!(queue_session: session, title: "A", artist: "A", vote_score: 1, created_at: 1.minute.ago)
+    expect(QueueItem.by_votes).to eq([b, a])
+  end
+end

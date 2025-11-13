@@ -1,0 +1,25 @@
+<%= turbo_stream.update "session-management" do %>
+  <div id="session-management" class="session-card">
+    <div class="session-header">
+      <h3>Session Management</h3>
+      <span class="badge badge-active">● ACTIVE</span>
+    </div>
+
+    <div class="code-display">
+      <label>Join Code</label>
+      <div class="code-box">
+        <span class="code-value"><%= @venue.queue_sessions.where(status: 'active').first.join_code %></span>
+        <button onclick="navigator.clipboard.writeText('<%= @venue.queue_sessions.where(status: 'active').first.join_code %>')" class="btn-copy">
+          📋 Copy
+        </button>
+      </div>
+    </div>
+
+    <div class="session-controls">
+      <%= link_to "View Dashboard", dashboard_host_venue_path(@venue), class: "btn btn-primary" %>
+      <%= link_to "Pause", pause_session_host_venue_path(@venue), method: :post, class: "btn btn-secondary" %>
+      <%= link_to "Regenerate Code", regenerate_code_host_venue_path(@venue), method: :post, class: "btn btn-secondary" %>
+      <%= link_to "End Session", end_session_host_venue_path(@venue), method: :post, class: "btn btn-danger" %>
+    </div>
+  </div>
+<% end %>

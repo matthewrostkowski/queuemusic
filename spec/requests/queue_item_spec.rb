@@ -1,7 +1,9 @@
 require "rails_helper"
 
 RSpec.describe QueueItem, type: :model do
-  let(:session) { QueueSession.create!(venue: Venue.create!(name: "Test Venue"), is_active: true) }
+  let(:host) { User.create!(display_name: "Host", auth_provider: "guest") }
+  let(:venue) { Venue.create!(name: "Test Venue", host_user_id: host.id) }
+  let(:session) { venue.queue_sessions.create!(status: "active", started_at: Time.current, join_code: "123456") }
 
   it "is valid with title and artist" do
     qi = QueueItem.new(queue_session: session, title: "Song", artist: "Artist")

@@ -1,27 +1,35 @@
+# app/controllers/scan_controller.rb
 class ScanController < ApplicationController
-  before_action :authenticate_user!
   def index
-  
+    @error = nil
   end
 
-  def create
-    code = params[:code]&.strip
-    
-    if code.blank?
-      flash[:alert] = "Please enter a code"
-      redirect_to scan_path and return
+  # POST /join or /scan - User enters a join code
+  def join_by_code
+    code = params[:join_code].to_s.strip.presence || params[:code].to_s.strip
+
+    # Validate format
+    unless JoinCodeGenerator.valid_format?(code)
+      @error = "Invalid code format. Please enter a 6-digit code."
+      return render :index
     end
-    
-    # Find queue session by code
-    queue_session = QueueSession.find_by(access_code: code, is_active: true)
-    
-    if queue_session
-      # Redirect to that venue's queue
-      redirect_to queue_path, #venue_queue_path(queue_session.venue_id), 
-                  notice: "Joined #{queue_session.venue.name}!"
-    else
-      flash[:alert] = "Invalid or inactive code: #{code}"
-      redirect_to scan_path
+
+    # Find active session with this code (handles join_code/access_code internally)
+    session_record = JoinCodeGenerator.find_active_session(code)
+    unless session_record
+      @error = "Code not found or session is no longer active. Please try again."
+      return render :index
     end
+
+    # Store in session and redirect to queue
+    set_current_queue_session(session_record)
+    redirect_to queue_path, notice: "Welcome to #{session_record.venue.name}! 🎵"
+  rescue => e
+    Rails.logger.error("Error joining queue: #{e.message}")
+    @error = "An error occurred. Please try again."
+    render :index
   end
+
+  # Backwards compatibility if anything calls ScanController#create
+  alias_method :create, :join_by_code
 end

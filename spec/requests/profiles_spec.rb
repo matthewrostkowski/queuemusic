@@ -39,8 +39,9 @@ RSpec.describe "Profiles", type: :request do
 
     context "with queue items" do
       before do
-        venue = Venue.create!(name: 'Test', location: '123 St', capacity: 200)
-        session = venue.queue_sessions.create!(is_active: true)
+        host = User.create!(display_name: 'Host', auth_provider: 'guest')
+      venue = Venue.create!(name: 'Test', location: '123 St', capacity: 200, host_user_id: host.id)
+        session = venue.queue_sessions.create!(status: "active", started_at: Time.current, join_code: JoinCodeGenerator.generate)
         song = Song.create!(title: 'Blinding Lights', artist: 'The Weeknd')
         
         QueueItem.create!(

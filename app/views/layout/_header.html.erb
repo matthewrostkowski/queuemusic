@@ -1,0 +1,23 @@
+<header>
+  <nav>
+    <div class="logo">
+      <%= link_to "🎵 Queue", root_path %>
+    </div>
+    
+    <ul class="nav-links">
+      <% if current_user %>
+        <li><%= link_to "Main", mainpage_path, class: (current_page?(mainpage_path) ? 'active' : '') %></li>
+        <li><%= link_to "Search", search_path, class: (current_page?(search_path) ? 'active' : '') %></li>
+        <li><%= link_to "Queue", queue_path, class: (current_page?(queue_path) ? 'active' : '') %></li>
+        <% if current_user.hosted_venues.any? %>
+          <li><%= link_to "Host", host_venues_path, class: (request.path.include?('host') ? 'active' : '') %></li>
+        <% end %>
+        <li style="color: #9CA3AF;"><%= current_user.display_name %></li>
+        <li><%= link_to "Logout", logout_path, method: :delete %></li>
+      <% else %>
+        <li><%= link_to "Login", login_path %></li>
+        <li><%= link_to "Sign Up", signup_path %></li>
+      <% end %>
+    </ul>
+  </nav>
+</header>

@@ -1,0 +1,437 @@
+@import 'design_tokens';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: $bg-dark;
+  color: $ink;
+  font-family: $font-secondary;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+// Typography
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-primary;
+  font-weight: 700;
+}
+
+h1 { font-size: 64px; margin-bottom: $space-6; }
+h2 { font-size: 40px; margin-bottom: $space-4; }
+h3 { font-size: 32px; margin-bottom: $space-4; }
+h4 { font-size: 24px; margin-bottom: $space-3; }
+
+p {
+  color: $muted;
+  margin-bottom: $space-3;
+}
+
+a {
+  color: $accent;
+  text-decoration: none;
+  transition: all 150ms ease;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+// Buttons
+.btn {
+  display: inline-block;
+  font-family: $font-primary;
+  font-weight: 700;
+  padding: $space-3 $space-4;
+  border-radius: $radius;
+  border: none;
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-size: 16px;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-1;
+  }
+  
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.btn-primary {
+  background-color: $accent;
+  color: $ink;
+  
+  &:hover {
+    background-color: darken(#1DB954, 10%);
+  }
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: $ink;
+  border: 2px solid $line;
+  
+  &:hover {
+    border-color: $accent;
+    color: $accent;
+  }
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: $muted;
+  padding: $space-2 $space-3;
+  
+  &:hover {
+    color: $ink;
+    text-decoration: underline;
+  }
+}
+
+.btn-danger {
+  background-color: $danger;
+  color: $ink;
+  
+  &:hover {
+    background-color: darken($danger, 10%);
+  }
+}
+
+// Cards
+.card {
+  background-color: lighten($bg-dark, 5%);
+  border: 1px solid $line;
+  border-radius: $radius;
+  padding: $space-4;
+  transition: all 150ms ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-1;
+  }
+  
+  .card-title {
+    font-family: $font-primary;
+    font-weight: 700;
+    font-size: 20px;
+    margin-bottom: $space-2;
+  }
+  
+  .card-subtitle {
+    color: $muted;
+    font-size: 14px;
+  }
+}
+
+// Header/Nav
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: $bg-dark;
+  border-bottom: 1px solid $line;
+  padding: $space-4;
+  
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    
+    .logo {
+      font-family: $font-primary;
+      font-weight: 900;
+      font-size: 28px;
+      color: $accent;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: $space-4;
+      list-style: none;
+      
+      a {
+        color: $muted;
+        padding: $space-2 $space-3;
+        border-bottom: 3px solid transparent;
+        transition: all 150ms ease;
+        
+        &:hover, &.active {
+          color: $ink;
+          border-bottom-color: $accent;
+        }
+      }
+    }
+  }
+}
+
+// Container
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: $space-6;
+}
+
+// Grid
+.grid {
+  display: grid;
+  gap: $space-4;
+  
+  &.cols-1 { grid-template-columns: 1fr; }
+  &.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  &.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+// Forms
+input, textarea, select {
+  background-color: lighten($bg-dark, 8%);
+  color: $ink;
+  border: 1px solid $line;
+  border-radius: $radius;
+  padding: $space-3 $space-4;
+  font-family: inherit;
+  font-size: 16px;
+  transition: all 150ms ease;
+  
+  &:focus {
+    outline: none;
+    border-color: $accent;
+    box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.1);
+  }
+  
+  &::placeholder {
+    color: $muted;
+  }
+}
+
+label {
+  display: block;
+  margin-bottom: $space-2;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+// States
+.alert {
+  padding: $space-4;
+  border-radius: $radius;
+  margin-bottom: $space-4;
+  
+  &.success {
+    background-color: rgba(18, 183, 106, 0.1);
+    color: $success;
+    border: 1px solid $success;
+  }
+  
+  &.error {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: $danger;
+    border: 1px solid $danger;
+  }
+  
+  &.warning {
+    background-color: rgba(253, 176, 34, 0.1);
+    color: $warn;
+    border: 1px solid $warn;
+  }
+}
+
+// Session Card
+.session-card {
+  background-color: lighten($bg-dark, 8%);
+  border: 1px solid $line;
+  border-radius: $radius;
+  padding: $space-6;
+  margin-bottom: $space-6;
+
+  .session-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $space-4;
+
+    h3 {
+      margin: 0;
+    }
+  }
+
+  .badge {
+    padding: $space-2 $space-3;
+    border-radius: $radius-pill;
+    font-size: 13px;
+    font-weight: 600;
+
+    &.badge-active {
+      background-color: rgba(18, 183, 106, 0.2);
+      color: $success;
+    }
+  }
+}
+
+// Code Display
+.code-display {
+  margin-bottom: $space-6;
+
+  label {
+    display: block;
+    margin-bottom: $space-2;
+    font-size: 13px;
+    color: $muted;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .code-box {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    background-color: lighten($bg-dark, 3%);
+    border: 2px solid $accent;
+    border-radius: $radius;
+    padding: $space-4;
+
+    .code-value {
+      font-family: 'Courier New', monospace;
+      font-size: 32px;
+      font-weight: 900;
+      color: $accent;
+      flex: 1;
+      letter-spacing: 2px;
+    }
+
+    .btn-copy {
+      background-color: $accent;
+      color: $ink;
+      border: none;
+      padding: $space-3 $space-4;
+      border-radius: $radius;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 150ms ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: $shadow-1;
+      }
+    }
+  }
+}
+
+// Session Controls
+.session-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: $space-3;
+  margin-bottom: $space-6;
+}
+
+// Session Empty
+.session-empty {
+  text-align: center;
+  padding: $space-8;
+
+  p {
+    margin-bottom: $space-4;
+  }
+
+  .btn-large {
+    padding: $space-4 $space-8;
+    font-size: 18px;
+  }
+}
+
+// Venue Header
+.venue-header {
+  margin-bottom: $space-8;
+
+  h1 {
+    margin-bottom: $space-3;
+  }
+
+  .venue-meta {
+    display: flex;
+    gap: $space-6;
+    color: $muted;
+    font-size: 16px;
+  }
+}
+
+// Back Link
+.back-link {
+  margin-bottom: $space-4;
+
+  a {
+    color: $accent;
+    font-size: 16px;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Previous Sessions
+.previous-sessions {
+  margin-bottom: $space-6;
+
+  h3 {
+    margin-bottom: $space-3;
+  }
+
+  .sessions-list {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+
+  .session-item {
+    display: flex;
+    justify-content: space-between;
+    padding: $space-3;
+    background-color: lighten($bg-dark, 5%);
+    border-radius: $radius;
+    border: 1px solid $line;
+
+    .text-muted {
+      color: $muted;
+      font-size: 13px;
+    }
+  }
+}
+
+// Venue Actions
+.venue-actions {
+  display: flex;
+  gap: $space-3;
+  padding-top: $space-6;
+  border-top: 1px solid $line;
+}
+
+// Utility
+.text-muted {
+  color: $muted;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  h1 { font-size: 40px; }
+  h2 { font-size: 28px; }
+  
+  .container {
+    padding: $space-4;
+  }
+}

@@ -1,8 +1,9 @@
 require "rails_helper"
 
 RSpec.describe "QueueItems", type: :request do
-  let!(:venue)   { Venue.create!(name: "V") }
-  let!(:session) { QueueSession.create!(venue: venue, is_active: true) }
+  let!(:host) { User.create!(display_name: "Host", auth_provider: "guest") }
+  let!(:venue) { Venue.create!(name: "V", host_user_id: host.id) }
+  let!(:session) { QueueSession.create!(venue: venue, status: "active", started_at: Time.current, join_code: JoinCodeGenerator.generate) }
   let!(:user)    { User.create!(display_name: "TestUser", auth_provider: "guest") }
 
   before { login_as(user) }

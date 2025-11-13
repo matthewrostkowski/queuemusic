@@ -1,8 +1,220 @@
-<h1>Login</h1>
+<% # app/views/sessions/new.html.erb %>
 
-<div data-testid="login-form">
-  <%= form_with url: session_path, method: :post do %>
-    <%= hidden_field_tag :provider, "guest" %>
-    <button id="continue-as-guest" type="submit">Continue as guest</button>
-  <% end %>
+<div class="login-container">
+  <div class="login-card">
+    <h1>Queue</h1>
+    <p class="tagline">Share music, share vibes</p>
+
+    <!-- Main Login Form -->
+    <div data-testid="login-form" class="login-form">
+      <form action="<%= login_path %>" method="post" class="email-login-form">
+        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+
+        <% if @error %>
+          <div class="error-message"><%= @error %></div>
+        <% end %>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input 
+            type="email" 
+            id="email"
+            name="email" 
+            placeholder="Enter your email" 
+            required
+            class="form-control"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input 
+            type="password" 
+            id="password"
+            name="password" 
+            placeholder="Enter your password" 
+            required
+            class="form-control"
+          >
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" name="sign_in">
+          Sign in
+        </button>
+      </form>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>or</span>
+      </div>
+
+      <!-- Guest Login Form -->
+      <form action="<%= login_path %>" method="post" class="guest-login-form">
+        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+        <input type="hidden" name="continue_as_guest" value="true">
+        
+        <button type="submit" class="btn btn-secondary btn-block" name="guest">
+          Continue as guest
+        </button>
+      </form>
+    </div>
+
+    <!-- Signup Link -->
+    <div class="signup-link">
+      <p>Don't have an account? <%= link_to "Sign up", signup_path %></p>
+    </div>
+  </div>
 </div>
+
+<style>
+  .login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .login-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    padding: 2rem;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .login-card h1 {
+    text-align: center;
+    margin: 0 0 0.5rem;
+    color: #333;
+    font-size: 2rem;
+  }
+
+  .tagline {
+    text-align: center;
+    color: #999;
+    margin: 0 0 2rem;
+    font-size: 0.9rem;
+  }
+
+  .login-form {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .btn-primary {
+    background: #667eea;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #5568d3;
+  }
+
+  .btn-secondary {
+    background: #f5f5f5;
+    color: #333;
+    border: 1px solid #ddd;
+  }
+
+  .btn-secondary:hover {
+    background: #eee;
+  }
+
+  .divider {
+    text-align: center;
+    margin: 1.5rem 0;
+    position: relative;
+  }
+
+  .divider span {
+    background: white;
+    padding: 0 0.5rem;
+    color: #999;
+  }
+
+  .divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #ddd;
+    z-index: -1;
+  }
+
+  .signup-link {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  .signup-link a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .signup-link a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 480px) {
+    .login-card {
+      padding: 1.5rem;
+    }
+
+    .login-card h1 {
+      font-size: 1.5rem;
+    }
+  }
+</style>

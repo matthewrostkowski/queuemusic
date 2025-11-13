@@ -1,14 +1,23 @@
+# app/controllers/sessions_controller.rb
 class SessionsController < ApplicationController
-  skip_before_action :authenticate_user!, only: [:create, :destroy, :omniauth]
-  #skip_before_action :set_current_user, only: [:create, :omniauth]
-  skip_forgery_protection only: [:omniauth]
+  # Allow login/logout + omniauth without being already signed in
+  skip_before_action :authenticate_user!, only: [:new, :create, :destroy, :omniauth]
+  # If you really want to skip set_current_user here you can uncomment:
+  # skip_before_action :set_current_user, only: [:create, :omniauth]
 
+  # CSRF is skipped for omniauth callback and JSON API login
+  skip_forgery_protection only: [:omniauth]
   skip_forgery_protection if -> { request.format.json? }
+
+  def new
+    redirect_to mainpage_path if current_user
+  end
 
   def create
     provider = params[:provider].presence || "guest"
 
     if provider == "general_user"
+      # Canonical email login flow (dev branch)
       raw_email = params[:email].to_s
       canonical = canonicalize_email(raw_email)
 
@@ -27,10 +36,13 @@ class SessionsController < ApplicationController
           format.json { render json: { error: "invalid_credentials" }, status: :unauthorized }
         end
       end
+      return
     else
+      # Guest login flow (works for "Continue as guest" button + default provider)
       reset_session
       display_name = params[:display_name].presence || "Guest #{SecureRandom.hex(3)}"
 
+      # Reuse existing guest user if present; otherwise create without validation
       user = User.find_by(auth_provider: "guest", display_name: display_name)
       unless user
         user = User.new(auth_provider: "guest", display_name: display_name)
@@ -42,15 +54,13 @@ class SessionsController < ApplicationController
         format.html { redirect_to after_sign_in_path, notice: "Welcome, #{user.display_name}" }
         format.json { render json: { id: user.id, display_name: user.display_name, auth_provider: user.auth_provider }, status: :ok }
       end
+      return
     end
   end
 
   def destroy
     reset_session
-    respond_to do |format|
-      format.html { redirect_to login_path, status: :see_other, notice: "Signed out" }
-      format.json { head :no_content }
-    end
+    redirect_to login_path, notice: "You have been logged out"
   end
 
   def omniauth
@@ -80,6 +90,7 @@ class SessionsController < ApplicationController
     local, domain = email.split("@", 2)
     return email unless local && domain
 
+    # Gmail-style canonicalization: strip plus-tags and dots
     local = local.split("+", 2)[0]
     local = local.delete(".")
     "#{local}@#{domain}"

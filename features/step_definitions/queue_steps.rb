@@ -3,8 +3,22 @@
 Given("a clean queue session") do
   QueueItem.delete_all
   QueueSession.delete_all
-  venue = Venue.first || Venue.create!(name: "Default Venue")
-  QueueSession.create!(venue: venue, is_active: true)
+
+  host = User.create!(
+    display_name: "QueueHost",
+    auth_provider: "guest"
+  )
+
+  @venue = Venue.create!(
+    name: "Test Venue",
+    host_user_id: host.id
+  )
+
+  @session = @venue.queue_sessions.create!(
+    status: "active",
+    started_at: Time.current,
+    join_code: JoinCodeGenerator.generate
+  )
 end
 
 When("I visit the search page") do
@@ -17,9 +31,14 @@ Then("I should see a search form") do
 end
 
 When("I POST a new queue item titled {string} by {string}") do |title, artist|
-  session = QueueSession.where(is_active: true).first || begin
+  session = QueueSession.where(status: "active").first || begin
     venue = Venue.first || Venue.create!(name: "Default Venue")
-    QueueSession.create!(venue: venue, is_active: true)
+    QueueSession.create!(
+      venue: venue,
+      status: "active",
+      started_at: Time.current,
+      join_code: JoinCodeGenerator.generate
+    )
   end
 
   params = {
@@ -46,9 +65,14 @@ Then("I should see {string} on the queue page") do |text|
 end
 
 Given("a queued item titled {string} by {string}") do |title, artist|
-  session = QueueSession.where(is_active: true).first || begin
+  session = QueueSession.where(status: "active").first || begin
     venue = Venue.first || Venue.create!(name: "Default Venue")
-    QueueSession.create!(venue: venue, is_active: true)
+    QueueSession.create!(
+      venue: venue,
+      status: "active",
+      started_at: Time.current,
+      join_code: JoinCodeGenerator.generate
+    )
   end
 
   QueueItem.create!(

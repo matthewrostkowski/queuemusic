@@ -2,8 +2,9 @@ require "rails_helper"
 
 RSpec.describe "QueueItemsController", type: :request do
   let!(:user)  { User.create!(display_name: "SpecUser", auth_provider: "guest") }
-  let!(:venue) { Venue.create!(name: "SpecVenue") }
-  let!(:qs)    { QueueSession.create!(venue: venue, is_active: true) }
+  let!(:host) { User.create!(display_name: "Host", auth_provider: "guest") }
+  let!(:venue) { Venue.create!(name: "SpecVenue", host_user_id: host.id) }
+  let!(:qs) { QueueSession.create!(venue: venue, status: "active", started_at: Time.current, join_code: JoinCodeGenerator.generate) }
   let!(:song1) { Song.create!(title: "Alpha", artist: "A") }
   let!(:song2) { Song.create!(title: "Beta",  artist: "B") }
 

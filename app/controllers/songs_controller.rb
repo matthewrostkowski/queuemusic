@@ -1,12 +1,15 @@
+# app/controllers/songs_controller.rb
 require_relative '../services/dynamic_pricing_service'
 
 class SongsController < ApplicationController
   require 'net/http'
   require 'json'
 
+  before_action :authenticate_user!
+
   def search
     @query = params[:q]
-    
+
     respond_to do |format|
       format.html do
         @results = []
@@ -49,27 +52,14 @@ class SongsController < ApplicationController
     price_cents = DynamicPricingService.calculate_position_price(queue_session, desired_position)
 
     render json: {
-      position: desired_position,
-      price_cents: price_cents,
-      price_display: "$#{'%.2f' % (price_cents / 100.0)}",
-      factors: DynamicPricingService.get_pricing_factors(queue_session, desired_position)
+      position:       desired_position,
+      price_cents:    price_cents,
+      price_display:  "$#{'%.2f' % (price_cents / 100.0)}",
+      factors:        DynamicPricingService.get_pricing_factors(queue_session, desired_position)
     }
   end
 
   private
-
-  def current_queue_session
-    # Get the active queue session or create a default one (same as queues_controller)
-    session = QueueSession.active.first || QueueSession.first
-
-    unless session
-      # Create a default venue and session if none exist
-      venue = Venue.first || Venue.create!(name: "Default Venue")
-      session = QueueSession.create!(venue: venue, is_active: true)
-    end
-
-    session
-  end
 
   def search_deezer(query)
     uri = URI("https://api.deezer.com/search")
@@ -78,22 +68,22 @@ class SongsController < ApplicationController
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE if Rails.env.development?
-    
-    request = Net::HTTP::Get.new(uri.request_uri)
+
+    request  = Net::HTTP::Get.new(uri.request_uri)
     response = http.request(request)
 
-    if response.code == '200'
-      data = JSON.parse(response.body)
-      tracks = data['data'] || []
-      
+    if response.code == "200"
+      data   = JSON.parse(response.body)
+      tracks = data["data"] || []
+
       tracks.map do |track|
         {
-          spotify_id: track['id'].to_s,
-          title: track['title'],
-          artist: track.dig('artist', 'name'),
-          cover_url: track.dig('album', 'cover_medium') || track.dig('album', 'cover_big'),
-          duration_ms: (track['duration'] * 1000).to_i,
-          preview_url: track['preview']
+          spotify_id:  track["id"].to_s,
+          title:       track["title"],
+          artist:      track.dig("artist", "name"),
+          cover_url:   track.dig("album", "cover_medium") || track.dig("album", "cover_big"),
+          duration_ms: (track["duration"] * 1000).to_i,
+          preview_url: track["preview"]
         }
       end
     else

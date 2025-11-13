@@ -10,12 +10,23 @@ Given('I am not logged in') do
 end
 
 Given('a venue {string} with an active queue session exists') do |venue_name|
+  host = User.create!(
+    display_name: 'ProfileHost',
+    auth_provider: 'guest'
+  )
+
   @venue = Venue.create!(
     name: venue_name,
     location: '123 Test St',
-    capacity: 200
+    capacity: 200,
+    host_user_id: host.id
   )
-  @queue_session = @venue.queue_sessions.create!(is_active: true)
+
+  @queue_session = @venue.queue_sessions.create!(
+    status: 'active',
+    started_at: Time.current,
+    join_code: JoinCodeGenerator.generate
+  )
 end
 
 Given('I have queued the song {string} by {string}') do |title, artist|
