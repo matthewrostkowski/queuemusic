@@ -1,6 +1,7 @@
 # app/controllers/api/pricing_controller.rb
 module Api
   class PricingController < ApplicationController
+    skip_before_action :authenticate_user!
     skip_before_action :verify_authenticity_token  # For API calls
     
     def current_prices
@@ -18,7 +19,7 @@ module Api
         render json: { 
           queue_session_id: queue_session.id,
           positions: positions,
-          factors: DynamicPricingService.get_pricing_factors(queue_session)
+          factors: DynamicPricingService.get_pricing_factors(queue_session, nil)
         }
       else
         render json: { error: "No active queue session found" }, status: :not_found
@@ -47,7 +48,8 @@ module Api
       queue_session = QueueSession.find_by(id: params[:queue_session_id]) || current_queue_session
       
       if queue_session
-        render json: DynamicPricingService.get_pricing_factors(queue_session)
+        position = params[:position].to_i
+        render json: DynamicPricingService.get_pricing_factors(queue_session, position)
       else
         render json: { error: "No active queue session found" }, status: :not_found
       end
